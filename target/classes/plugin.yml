@@ -1,0 +1,5 @@
+name: VVKart
+version: '0.1'
+main: me.Codex.vVKart.VVKartMain.java
+api-version: '1.21'
+load: STARTUP
