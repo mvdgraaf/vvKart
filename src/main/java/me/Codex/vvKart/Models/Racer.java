@@ -45,7 +45,7 @@ public class Racer {
         this.player = player;
         this.race = race;
 
-        this.currentLap = 0;
+        this.currentLap = 1;
         this.currentCheckpoint = 0;
         this.passedCheckpoints = new HashSet<>();
         this.position = 0;

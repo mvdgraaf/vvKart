@@ -10,6 +10,11 @@ race:
   finish-timeout: 30
   speed-multiplier: 1.0
 
+kart:
+  speed-multiplier: 2.5
+  max-speed: 3.5
+  acceleration: 0.5
+  friction: 0.92
 
 # Rewards
 rewards:

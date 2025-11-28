@@ -26,20 +26,27 @@ public class CheckpointListener extends BukkitRunnable {
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             Race race = plugin.getRaceManager().getRace(player);
 
-            if (race == null) continue;
+            if (race == null) {
+                continue;
+            }
             if (race.getState() != Race.RaceState.RACING) continue;
 
             Racer racer = race.getRacer(player);
             if (racer == null || racer.isFinished()) continue;
 
-            Location playerLoc = player.getLocation();
+            Location location;
+            if (racer.getMinecart() != null && racer.getMinecart().isValid()) {
+                location = racer.getMinecart().getLocation();
+            } else {
+                location = player.getLocation();
+            }
             Track track = race.getTrack();
 
             // Check checkpoints
-            checkCheckpoints(racer, playerLoc, track);
+            checkCheckpoints(racer, location, track);
 
             // Check finish line
-            checkFinishLine(racer, playerLoc, track);
+            checkFinishLine(racer, location, track);
         }
     }
 

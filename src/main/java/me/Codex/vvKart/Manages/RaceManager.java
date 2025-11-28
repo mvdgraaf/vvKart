@@ -165,6 +165,7 @@ public class RaceManager {
 
         racer.setFinishTime(System.currentTimeMillis());
         racer.setFinished(true);
+        plugin.getQueueManager().removeFromQueue(racer.getPlayer());
 
         Player player = racer.getPlayer();
         if (player != null) {
