@@ -100,16 +100,16 @@ public class Race {
         // Sort by: finished first, then by lap, then by checkpoint
         sorted.sort((r1, r2) -> {
             // Finished racers come first
-            if (r1. isFinished() && !r2.isFinished()) return -1;
+            if (r1.isFinished() && !r2.isFinished()) return -1;
             if (!r1.isFinished() && r2.isFinished()) return 1;
 
             // If both finished, sort by finish time
-            if (r1. isFinished() && r2. isFinished()) {
+            if (r1.isFinished() && r2.isFinished()) {
                 return Long.compare(r1.getFinishTime(), r2.getFinishTime());
             }
 
             // Compare by lap
-            int lapCompare = Integer.compare(r2.getCurrentLap(), r1. getCurrentLap());
+            int lapCompare = Integer.compare(r2.getCurrentLap(), r1.getCurrentLap());
             if (lapCompare != 0) return lapCompare;
 
             // Compare by checkpoint
@@ -117,7 +117,7 @@ public class Race {
         });
 
         // Assign positions
-        for (int i = 0; i < sorted. size(); i++) {
+        for (int i = 0; i < sorted.size(); i++) {
             sorted.get(i).setPosition(i + 1);
         }
     }
