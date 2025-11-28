@@ -51,7 +51,7 @@ public final class Main extends JavaPlugin {
         return leaderBoardManager;
     }
 
-    public static Main getInstance() {;
+    public static Main getInstance() {
         return JavaPlugin.getPlugin(Main.class);
     }
 }
