@@ -1,0 +1,64 @@
+# VVKart Configuration
+# Alle tijden zijn in seconden
+
+# Race instellingen
+race:
+  max-players: 10
+  min-players: 2
+  laps: 3
+  queue-wait-time: 30
+  finish-timeout: 30
+  speed-multiplier: 1.0
+
+# Rewards
+rewards:
+  coins-per-completion: 2
+  enabled: true
+
+# Leave item (item om uit race te gaan)
+leave-item:
+  material: BARRIER
+  name: "&c&lVerlaat Race"
+  lore:
+    - "&7Klik om de race te verlaten"
+  slot: 8
+
+# Custom commands (uitgevoerd na race)
+custom-commands:
+  enabled: false
+  commands:
+    - "give %player% diamond 1"
+    - "say %player% heeft de race voltooid!"
+
+# Berichten
+messages:
+  prefix: "&6[VVKart] &r"
+  no-permission: "&cJe hebt geen permissie voor dit commando!"
+  reload-success: "&aPlugin succesvol herladen!"
+  track-created: "&aBaan '&e%track%&a' succesvol aangemaakt!"
+  track-deleted: "&aBaan '&e%track%&a' succesvol verwijderd!"
+  track-not-found: "&cBaan '&e%track%&c' niet gevonden!"
+  track-already-exists: "&cBaan '&e%track%&c' bestaat al!"
+  hub-set: "&aHub locatie ingesteld voor baan '&e%track%&a'!"
+  start-position-set: "&aStart positie &e%position%&a ingesteld voor baan '&e%track%&a'!"
+  finish-set: "&aFinish locatie ingesteld voor baan '&e%track%&a'!"
+  finish-deleted: "&aFinish locatie verwijderd voor baan '&e%track%&a'!"
+  checkpoint-created: "&aCheckpoint &e%number%&a aangemaakt voor baan '&e%track%&a'!"
+  checkpoint-deleted: "&aCheckpoint &e%number%&a verwijderd voor baan '&e%track%&a'!"
+  track-opened: "&aBaan '&e%track%&a' is nu open!"
+  track-closed: "&aBaan '&e%track%&a' is nu gesloten!"
+  track-not-ready: "&cBaan '&e%track%&c' is nog niet klaar om te racen!"
+  leaderboard-set: "&aLeaderboard ingesteld voor baan '&e%track%&a'!"
+  leaderboard-deleted: "&aLeaderboard verwijderd voor baan '&e%track%&a'!"
+  joined-queue: "&aJe bent de race queue van &e%track%&a toegetreden!"
+  left-queue: "&aJe bent uit de race queue van &e%track%&a verlaten!"
+  player-left-queue: "&cSpeler &e%player% &cverlaat de race queue van &e%track%&c!"
+  already-in-queue: "&cJe bent al in de race queue!"
+  already-in-race: "&cJe bent al in de race!"
+  left-race: "&cJe hebt de race verlaten!"
+  race-starting: "&aRace start in &e%seconds%&a seconden..."
+  race-started: "&a&lGO! GO! GO!"
+  race-finished: "&aJe hebt de race voltooid op positie &e%position%&a!"
+  lap-completed: "&aRonde &e%lap%&a/&e%total%&a voltooid!  Tijd: &e%time%&a"
+  checkpoint-passed: "&aCheckpoint bereikt!"
+  position-update: "&ePositie: &6%position% &8| &eRonde: &6%lap%/%total% &8| &eTijd: &6%time%"
