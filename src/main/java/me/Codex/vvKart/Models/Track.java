@@ -19,8 +19,8 @@ public class Track {
     private Location Leaderboard;
     private int laps;
     private List<LeaderboardEntry> fastestTimes = new ArrayList<>();
-    private int maxLeaderboardEntries = 10;
-    private int min_player = 2;
+    private final int maxLeaderboardEntries = 10;
+    private int min_player;
 
     public Track(String name, Main plugin) {
         this.plugin = plugin;
