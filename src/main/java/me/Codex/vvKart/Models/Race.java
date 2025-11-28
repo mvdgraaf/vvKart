@@ -33,7 +33,7 @@ public class Race {
     }
 
     public boolean addRacer(Player player) {
-        if (racers.size() >= plugin.getConfig().getInt("race.max-players") ) {
+        if (racers.size() >= plugin.getConfig().getInt("race.max-players", 10) ) {
             return false;
         }
 

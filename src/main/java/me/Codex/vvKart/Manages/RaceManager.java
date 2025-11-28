@@ -7,6 +7,8 @@ import me.Codex.vvKart.Models.Racer;
 import me.Codex.vvKart.Models.Track;
 import me.Codex.vvKart.Utils.Message;
 import me.Codex.vvKart.Utils.Time;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -165,7 +167,7 @@ public class RaceManager {
 
         Player player = racer.getPlayer();
         if (player != null) {
-            Message.sendTitle(player, "&a&lFINISHED!", Color.BLUE + Time.formatTime(racer.getElapsedTime()), 0, 20, 10);
+            Message.sendTitle(player, "&a&lFINISHED!", NamedTextColor.BLUE + Time.formatTime(racer.getElapsedTime()), 0, 20, 10);
             player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1, 1);
             Message.send(player,"race-finished",
                     "position", String.valueOf(racer.getPosition()),
@@ -259,7 +261,7 @@ public class RaceManager {
                 // Remove from race
                 race.removeRacer(racer.getPlayerUUID());
 
-                Message.send(player, "&4left-race");
+                Message.send(player, "left-race");
 
                 // Check if race should end
                 if (race.getRacers().isEmpty()) {
