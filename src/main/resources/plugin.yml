@@ -3,3 +3,17 @@ version: '0.1'
 main: me.Codex.vvKart.Main
 api-version: '1.21'
 load: STARTUP
+
+commands:
+  vvkart:
+    description: Main command for vvKart
+    usage: /<command> [args]
+    aliases: [kart]
+
+permissions:
+  vvkart.admin:
+    description: Toegang tot alle admin commands
+    default: op
+  vvkart.reload:
+    description: Reload de plugin
+    default: op
