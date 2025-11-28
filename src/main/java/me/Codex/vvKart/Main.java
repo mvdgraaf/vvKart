@@ -1,5 +1,6 @@
 package me.Codex.vvKart;
 
+import me.Codex.vvKart.Commands.LeaderboardTest;
 import me.Codex.vvKart.Manages.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -26,12 +27,28 @@ public final class Main extends JavaPlugin {
         raceManager = new RaceManager(this);
         leaderBoardManager = new LeaderBoardManager(this);
         queueManager = new QueueManager(this);
+        this.getCommand("testdisplay").setExecutor(new LeaderboardTest());
+
+        leaderBoardManager.loadAllLeaderboards();
+
         getLogger().info("Plugin enabled!");
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+
+        if (raceManager != null) {
+            raceManager.cleanup();
+        }
+        if (dataManager != null) {
+            dataManager.saveAll();
+        }
+        if (leaderBoardManager != null) {
+            leaderBoardManager.removeAllLeaderboards();
+        }
+
+        getLogger().info("Plugin disabled!");
+
     }
 
     public TrackManager getTrackManager() {

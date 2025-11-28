@@ -85,14 +85,9 @@ public class DataManager {
             }
 
             // Load leaderboard locations
-            if (config.contains("leaderboard-top")) {
-                Location loc = LocationUtil.deserialize(config.getString("leaderboard-top"));
-                track.setLeaderboard(loc);
-            }
-
-            if (config.contains("leaderboard-fastest")) {
-                Location loc = LocationUtil.deserialize(config.getString("leaderboard-fastest"));
-                track.setLeaderboard(loc);
+            if (config.contains("leaderboard")) {
+                Location leaderboard = LocationUtil.deserialize(config.getString("leaderboard"));
+                track.setLeaderboard(leaderboard);
             }
 
             plugin.getTrackManager().addTrack(track);
@@ -134,8 +129,8 @@ public class DataManager {
             }
         }
 
-        if(track.getLeaderboard() != null) {
-            config.set("leaderboard-top", LocationUtil.serialize(track.getLeaderboard()));
+        if (track.getLeaderboard() != null) {
+            config.set("leaderboard", LocationUtil.serialize(track.getLeaderboard()));
         }
 
         try {

@@ -1,7 +1,7 @@
 name: vvKart
 version: '0.1'
 main: me.Codex.vvKart.Main
-api-version: '1.21'
+api-version: '1.20.4'
 load: STARTUP
 
 commands:
@@ -9,6 +9,9 @@ commands:
     description: Main command for vvKart
     usage: /<command> [args]
     aliases: [kart]
+  testdisplay:
+    description: places a display on the map
+    usage: /<command>
 
 permissions:
   vvkart.admin:
