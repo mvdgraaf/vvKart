@@ -153,6 +153,7 @@ public class RaceManager {
         long finishedCount = race.getRacers().stream(). filter(Racer::isFinished).count();
         if (finishedCount == 1) {
             startFinishTimeout(race);
+            assert player != null;
             race.markFirstFinisher(player.getUniqueId());
         }
 
