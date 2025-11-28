@@ -1,5 +1,6 @@
 package me.Codex.vvKart.Utils;
 
+import me.Codex.vvKart.Main;
 import org.bukkit. Bukkit;
 import org.bukkit.Location;
 import org. bukkit.World;
@@ -28,28 +29,45 @@ public class LocationUtil {
      */
     public static Location deserialize(String string) {
         if (string == null || string.isEmpty()) {
-            return null;
-        }
-
-        String[] parts = string.split(",");
-        if (parts.length != 6) {
+            Main.getInstance().getLogger().warning("LocationUtil: string is null or empty");
             return null;
         }
 
         try {
+            String[] parts = string.split(",");
+
+            if (parts.length < 4) {
+                Main.getInstance(). getLogger().warning("LocationUtil: Invalid format - " + string);
+                return null;
+            }
+
             World world = Bukkit.getWorld(parts[0]);
+
             if (world == null) {
+                Main.getInstance().getLogger().warning("LocationUtil: World not found - " + parts[0]);
                 return null;
             }
 
             double x = Double.parseDouble(parts[1]);
-            double y = Double.parseDouble(parts[2]);
+            double y = Double. parseDouble(parts[2]);
             double z = Double.parseDouble(parts[3]);
-            float yaw = Float.parseFloat(parts[4]);
-            float pitch = Float.parseFloat(parts[5]);
 
-            return new Location(world, x, y, z, yaw, pitch);
-        } catch (NumberFormatException e) {
+            float yaw = 0;
+            float pitch = 0;
+
+            if (parts.length >= 5) {
+                yaw = Float.parseFloat(parts[4]);
+            }
+            if (parts.length >= 6) {
+                pitch = Float.parseFloat(parts[5]);
+            }
+
+            Location loc = new Location(world, x, y, z, yaw, pitch);
+            Main.getInstance().getLogger().info("LocationUtil: Loaded location - " + loc);
+            return loc;
+
+        } catch (Exception e) {
+            Main.getInstance().getLogger().warning("LocationUtil: Error deserializing - " + e.getMessage());
             return null;
         }
     }

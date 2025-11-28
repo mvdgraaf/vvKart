@@ -28,7 +28,7 @@ public class LeaderBoardManager {
         this.leaderboardDisplays = new HashMap<>();
     }
 
-    public boolean createLeaderBoard(Track track, Location locaction) {
+    public boolean createLeaderboard(Track track, Location locaction) {
 
         removeLeaderboard(track);
 
@@ -105,12 +105,12 @@ public class LeaderBoardManager {
         return text;
     }
 
-    public void updateLeaderBoard(Track track) {
+    public void updateLeaderboard(Track track) {
 
         TextDisplay display = leaderboardDisplays.get(track);
 
         if (display != null && track.getLeaderboard() != null) {
-            createLeaderBoard(track, track.getLeaderboard());
+            createLeaderboard(track, track.getLeaderboard());
             display = leaderboardDisplays.get(track);
         }
 
@@ -137,7 +137,7 @@ public class LeaderBoardManager {
     public void loadAllLeaderboards() {
         for (Track track : plugin.getTrackManager().getAllTracks()) {
             if (track.getLeaderboard() != null) {
-                createLeaderBoard(track, track.getLeaderboard());
+                createLeaderboard(track, track.getLeaderboard());
             }
         }
     }
@@ -153,7 +153,7 @@ public class LeaderBoardManager {
 
     public void updateAllLeaderboards() {
         for (Track track : plugin.getTrackManager(). getAllTracks()) {
-            updateLeaderBoard(track);
+            updateLeaderboard(track);
         }
     }
 

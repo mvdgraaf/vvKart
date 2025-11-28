@@ -54,46 +54,71 @@ public class DataManager {
             track.setOpen(config.getBoolean("open", false));
 
             if (config.contains("hub")) {
-                Location hub = config.getLocation("hub");
+                Location hub = LocationUtil.deserialize(config.getString("hub"));
                 track.setHub(hub);
+            }
+
+            if (config.contains("finish")) {
+                Location finish = LocationUtil.deserialize(config.getString("finish"));
+                track.setFinish(finish);
             }
 
             if (config.contains("start-positions")) {
                 ConfigurationSection startSection = config.getConfigurationSection("start-positions");
-                assert startSection != null;
-                for (String key : startSection.getKeys(false)) {
-                    int position = Integer.parseInt(key);
-                    Location loc = LocationUtil.deserialize(startSection.getString(key));
-                    track.setStartPosition(position, loc);
+                if (startSection != null) {
+                    for (String key : startSection.getKeys(false)) {
+                        try {
+                            int position = Integer.parseInt(key);
+                            Location loc = LocationUtil.deserialize(startSection.getString(key));
+                            if (loc != null) {
+                                track.setStartPosition(position, loc);
+                            }
+                        } catch (Exception e) {
+                            plugin. getLogger().warning("Could not load start position " + key + " for track " + trackName);
+                        }
+                    }
                 }
             }
 
             if (config.contains("checkpoints")) {
                 ConfigurationSection checkpointSection = config.getConfigurationSection("checkpoints");
-                assert checkpointSection != null;
-                for (String key : checkpointSection. getKeys(false)) {
-                    int number = Integer.parseInt(key);
-                    ConfigurationSection cpSection = checkpointSection.getConfigurationSection(key);
+                if (checkpointSection != null) {
+                    for (String key : checkpointSection.getKeys(false)) {
+                        try {
+                            int number = Integer.parseInt(key);
+                            ConfigurationSection cpSection = checkpointSection.getConfigurationSection(key);
 
-                    assert cpSection != null;
-                    Location pos1 = LocationUtil.deserialize(cpSection.getString("pos1"));
-                    Location pos2 = LocationUtil.deserialize(cpSection.getString("pos2"));
+                            if (cpSection != null) {
+                                Location pos1 = LocationUtil.deserialize(cpSection.getString("pos1"));
+                                Location pos2 = LocationUtil.deserialize(cpSection.getString("pos2"));
 
-                    Checkpoint checkpoint = new Checkpoint(number, pos1, pos2);
-                    track.addCheckpoint(checkpoint);
+                                // Check if both locations are valid
+                                if (pos1 != null && pos2 != null) {
+                                    Checkpoint checkpoint = new Checkpoint(number, pos1, pos2);
+                                    track.addCheckpoint(checkpoint);
+                                } else {
+                                    plugin.getLogger().warning("Skipping checkpoint " + number + " for track " + trackName + " (invalid location data)");
+                                }
+                            }
+                        } catch (Exception e) {
+                            plugin.getLogger().warning("Could not load checkpoint " + key + " for track " + trackName + ": " + e.getMessage());
+                        }
+                    }
                 }
             }
 
-            // Load leaderboard locations
+            // Load leaderboard location
             if (config.contains("leaderboard")) {
                 Location leaderboard = LocationUtil.deserialize(config.getString("leaderboard"));
-                track.setLeaderboard(leaderboard);
+                if (leaderboard != null) {
+                    track.setLeaderboard(leaderboard);
+                }
             }
 
             plugin.getTrackManager().addTrack(track);
         }
 
-            plugin.getLogger().info("Loaded " + (files != null ? files.length : 0) + " tracks!");
+        plugin.getLogger().info("Loaded " + (files != null ? files.length : 0) + " tracks!");
     }
 
 

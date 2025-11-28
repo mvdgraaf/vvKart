@@ -156,7 +156,7 @@ public class QueueManager {
         stopStatusUpdates(track);
 
         for (Player player : getQueuePlayers(track)) {
-            Message.send(player, "queue-countdown", "seconds", String.valueOf(countdownTime));
+            Message.send(player, "queue-countdown", "seconds", String.valueOf(countdownTime), "track", track.getName());
             Message.sendTitle(player, "&a&lRace Start!", "&eIn " + countdownTime + "", 0, 20, 10);
         }
 

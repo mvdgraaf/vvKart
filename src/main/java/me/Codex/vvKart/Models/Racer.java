@@ -4,6 +4,7 @@ import me.Codex.vvKart.Main;
 import me.Codex.vvKart.Utils.Message;
 import me.Codex.vvKart.Utils.Time;
 import org.bukkit.Material;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -29,6 +30,7 @@ public class Racer {
     private long finishTime;
     private long lastLapTime;
 
+    private ArmorStand armorStand;
     private Minecart minecart;
 
     private ItemStack[] inventoryContents;
@@ -172,12 +174,29 @@ public class Racer {
         this.finished = true;
     }
 
+    public ArmorStand getArmorStand() {
+        return armorStand;
+    }
+
+    public void setArmorStand(ArmorStand armorStand) {
+        this.armorStand = armorStand;
+    }
+
     public Minecart getMinecart() {
         return minecart;
     }
 
     public void setMinecart(Minecart minecart) {
         this.minecart = minecart;
+    }
+
+    public void removeEntities() {
+        if (minecart != null && minecart.isValid()) {
+            minecart.remove();
+        }
+        if (armorStand != null && armorStand.isValid()) {
+            armorStand.remove();
+        }
     }
 
     public boolean isFinished() {

@@ -1,13 +1,14 @@
 package me.Codex.vvKart.Models;
 
+import me.Codex.vvKart.Main;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 
-import static me.Codex.vvKart.Main.getInstance;
-
 public class Race {
+
+    private final Main plugin;
 
     private final Track track;
     private final Map<UUID, Racer> racers;
@@ -23,15 +24,16 @@ public class Race {
     private long finishCountdownStart;
     private int timeoutSeconds = 30;
 
-    public Race(Track track) {
+    public Race(Track track, Main plugin) {
+        this.plugin = plugin;
         this.track = track;
         this.racers = new HashMap<>();
         this.state = RaceState.WAITING;
-        this.countdownSeconds = getInstance().getConfig().getInt("queue-wait-time");
+        this.countdownSeconds = plugin.getConfig().getInt("race.queue-wait-time");
     }
 
     public boolean addRacer(Player player) {
-        if (racers.size() >= getInstance().getConfig().getInt("max-players") ) {
+        if (racers.size() >= plugin.getConfig().getInt("race.max-players") ) {
             return false;
         }
 

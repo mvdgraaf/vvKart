@@ -96,8 +96,8 @@ public class Track {
         this.checkpoints. sort(Comparator.comparingInt(Checkpoint::getNumber));
     }
 
-    public void removeCheckpoint(int number) {
-        this.checkpoints.removeIf(cp -> cp.getNumber() == number);
+    public boolean removeCheckpoint(int number) {
+        return this.checkpoints.removeIf(cp -> cp.getNumber() == number);
     }
 
     public Checkpoint getCheckpoint(int number) {

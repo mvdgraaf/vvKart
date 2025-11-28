@@ -11,6 +11,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -40,29 +42,54 @@ public class RaceManager {
             return;
         }
 
-        Race race = new Race(track);
+        Race race = new Race(track, plugin);
         activeRaces.put(track, race);
 
         int position = 1;
         for (Player player : players) {
+
             race.addRacer(player);
             playerRaces.put(player.getUniqueId(), race);
 
+            Racer racer = race.getRacer(player.getUniqueId());
+
+            if (racer == null) {
+                plugin.getLogger().warning("Could not create racer for " + player.getName());
+                continue;
+            }
+
+            // Teleport en spawn minecart
             Location startPos = track.getStartPosition(position);
             if (startPos != null) {
                 player.teleport(startPos);
+//
+//                ArmorStand armorStand = (ArmorStand) startPos.getWorld().spawnEntity(startPos, EntityType.ARMOR_STAND);
+//                armorStand.setVisible(false);
+//                armorStand.setGravity(true);
+//                armorStand.setInvulnerable(true);
+//                armorStand.setCanPickupItems(false);
+//                armorStand.setCollidable(false);
+//                armorStand.setMarker(false);
+//                armorStand.setSilent(true);
 
-                Minecart minecart = startPos.getWorld().spawn(startPos, Minecart.class);
+                Minecart minecart = (Minecart) startPos.getWorld().spawnEntity(
+                        startPos. clone().add(0, 0.2, 0),
+                        EntityType.MINECART
+                );
+                minecart.setInvulnerable(true);
+                minecart.setSilent(true);
                 minecart.addPassenger(player);
-                race.getRacer(player.getUniqueId()).setMinecart(minecart);
+                racer.setMinecart(minecart);
             }
-            race.getRacer(player).saveInventory();
-            race.getRacer(player).clearInventory();
-            race.getRacer(player).giveLeaveItem();
-            player.setGameMode(GameMode.ADVENTURE);
+
+            racer.saveInventory();
+            racer.clearInventory();
+            racer.giveLeaveItem();
+            player.setGameMode(GameMode. ADVENTURE);
 
             position++;
         }
+
         startCountdown(race);
     }
 
@@ -197,6 +224,10 @@ public class RaceManager {
         return playerRaces.containsKey(player.getUniqueId());
     }
 
+    public Race getRace(Player player) {
+        return playerRaces.get(player.getUniqueId());
+    }
+
     public Racer getRacer(Player player) {
         Race race = playerRaces.get(player.getUniqueId());
         return race != null ? race.getRacer(player) : null;
@@ -213,7 +244,6 @@ public class RaceManager {
         if (race != null) {
             Racer racer = race.getRacer(player. getUniqueId());
             if (racer != null) {
-                // Remove minecart
                 if (racer.getMinecart() != null) {
                     racer.getMinecart().remove();
                 }
@@ -289,7 +319,7 @@ public class RaceManager {
         plugin.getDataManager().saveLeaderboard();
 
         // Update leaderboard displays
-        plugin.getLeaderBoardManager().updateLeaderBoard(race.getTrack());
+        plugin.getLeaderBoardManager().updateLeaderboard(race.getTrack());
     }
 
     private void showResults(Race race) {
