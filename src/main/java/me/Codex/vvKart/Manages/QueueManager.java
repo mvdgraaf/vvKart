@@ -6,7 +6,6 @@ import me.Codex.vvKart.Utils.Message;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.rmi.server.UID;
 import java.util.*;
 
 public class QueueManager {
