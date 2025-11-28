@@ -47,8 +47,6 @@ public class KartController {
                 float forward = event.getPacket().getFloat(). read(1);   // W/S
                 float sideways = event.getPacket().getFloat(). read(0);  // A/D
 
-                forward = -forward; // invert forward so W -> positive
-
                 // Get player's horizontal look direction
                 Vector dir = player.getLocation().getDirection().clone();
                 dir. setY(0);
