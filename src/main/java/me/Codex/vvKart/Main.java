@@ -4,6 +4,7 @@ package me.Codex.vvKart;
 import me.Codex.vvKart.Commands.LeaderboardTest;
 import me.Codex.vvKart.Commands.VVKartCommand;
 import me.Codex.vvKart.Kart.KartController;
+import me.Codex.vvKart.Listeners.CheckpointListener;
 import me.Codex.vvKart.Listeners.PlayerInteractListener;
 import me.Codex.vvKart.Listeners.PlayerLeaveEvent;
 import me.Codex.vvKart.Listeners.VehicleExitListener;
@@ -21,11 +22,7 @@ public final class Main extends JavaPlugin {
     private LeaderBoardManager leaderBoardManager;
     private QueueManager queueManager;
     private KartController kartController;
-    //
-//    @Override
-//    public void onLoad() {
-//
-//    }
+    private CheckpointListener checkpointTask;
 
     @Override
     public void onEnable() {
@@ -42,6 +39,9 @@ public final class Main extends JavaPlugin {
 
         kartController = new KartController(this);
         kartController.register();
+
+        checkpointTask = new CheckpointListener(this);
+        checkpointTask.runTaskTimer(this, 0L, 2L);
 
         Objects.requireNonNull(this.getCommand("testdisplay")).setExecutor(new LeaderboardTest());
         Objects.requireNonNull(getCommand("vvkart")).setExecutor(new VVKartCommand(this));
@@ -89,7 +89,7 @@ public final class Main extends JavaPlugin {
     private void registerListeners() {
         getServer().getPluginManager().registerEvents(new VehicleExitListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerLeaveEvent(Main.getInstance()), this);
-        getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerInteractListener(this), this);
 
         // World load listener
         getServer().getPluginManager().registerEvents(new org.bukkit.event. Listener() {

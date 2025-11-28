@@ -87,7 +87,7 @@ public class Racer {
         ItemMeta meta = item.getItemMeta();
 
         String name = Main.getInstance().getConfig().getString("leave-item.name", "&c&lVerlaat Race");
-        meta.setDisplayName(Message.getMessage("leave-item.name"));
+        meta.setDisplayName(name);
 
         List<String> lore = Main.getInstance().getConfig().getStringList("leave-item.lore");
         if (! lore.isEmpty()) {

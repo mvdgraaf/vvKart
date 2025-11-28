@@ -19,10 +19,12 @@ public class VVKartCommand implements CommandExecutor {
     private final Main plugin;
 
     private final Map<UUID, Map<Integer, Location>> tempCheckpointPositions;
+    private final Map<UUID, Location> tempFinishPos1;
 
     public VVKartCommand(Main plugin) {
         this.plugin = plugin;
         this.tempCheckpointPositions = new HashMap<>();
+        this.tempFinishPos1 = new HashMap<>();
     }
 
     @Override
@@ -165,7 +167,7 @@ public class VVKartCommand implements CommandExecutor {
         sender.sendMessage("§6§l▬▬▬▬▬ Track Info: " + track.getName() + " ▬▬▬▬▬");
         sender.sendMessage("§eStatus: " + (track.isOpen() ? "§aOpen" : "§cGesloten"));
         sender.sendMessage("§eHub: " + (track.getHub() != null ? "§a✓" : "§c✗"));
-        sender.sendMessage("§eFinish: " + (track.getFinish() != null ? "§a✓" : "§c✗"));
+        sender.sendMessage("§eFinish: " + (track.getFinishPos2() != null ? "§a✓" : "§c✗"));
         sender.sendMessage("§eStartposities: §f" + track.getStartPositions().size());
         sender.sendMessage("§eCheckpoints: §f" + track. getCheckpoints().size());
         sender.sendMessage("§eRondes: §f" + track.getLaps());
@@ -263,26 +265,66 @@ public class VVKartCommand implements CommandExecutor {
             return;
         }
 
-        if (!sender.hasPermission("vvkart.setup")) {
+        if (! sender.hasPermission("vvkart.setup")) {
             Message.send(sender, "no-permission");
             return;
         }
 
-        if (args.length < 2) {
-            sender.sendMessage("§cGebruik: /vvkart setfinish <naam>");
+        if (args.length < 3) {
+            sender.sendMessage("§cGebruik: /vvkart setfinish <pos1/pos2> <naam>");
             return;
         }
 
-        Track track = plugin. getTrackManager().getTrack(args[1]);
+        String posType = args[1].toLowerCase();
+        Track track = plugin.getTrackManager().getTrack(args[2]);
 
         if (track == null) {
-            Message.send(sender, "track-not-found", "track", args[1]);
+            Message.send(sender, "track-not-found", "track", args[2]);
             return;
         }
 
-        track.setFinish(player.getLocation());
-        plugin.getDataManager(). saveTrack(track);
-        Message.send(sender, "finish-set", "track", track. getName());
+        Location location = player.getLocation();
+        UUID playerUUID = player.getUniqueId();
+
+        if (posType.equals("pos1")) {
+            tempFinishPos1.put(playerUUID, location);
+            player.sendMessage("§a§l✓ Finish positie 1 ingesteld!");
+            player.sendMessage("§eGa naar de andere kant van de finish lijn:");
+            player.sendMessage("§f/vvkart setfinish pos2 " + track.getName());
+
+        } else if (posType.equals("pos2")) {
+            Location pos1 = tempFinishPos1. get(playerUUID);
+
+            if (pos1 == null) {
+                sender.sendMessage("§cJe hebt nog geen pos1 ingesteld!");
+                sender.sendMessage("§eGebruik eerst: §f/vvkart setfinish pos1 " + track.getName());
+                return;
+            }
+
+            Location pos2 = location;
+
+            if (! pos1.getWorld().equals(pos2.getWorld())) {
+                sender.sendMessage("§cPos1 en pos2 moeten in dezelfde wereld zijn!");
+                tempFinishPos1.remove(playerUUID);
+                return;
+            }
+
+            double distance = pos1.distance(pos2);
+            if (distance < 1.0) {
+                sender.sendMessage("§cPos1 en pos2 zijn te dichtbij elkaar!");
+                return;
+            }
+
+            track.setFinishZone(pos1, pos2);
+            plugin.getDataManager().saveTrack(track);
+            tempFinishPos1.remove(playerUUID);
+
+            Message.send(sender, "finish-set", "track", track.getName());
+            sender.sendMessage("§aFinish zone breedte: §e" + String.format("%.2f", distance) + " blokken");
+
+        } else {
+            sender.sendMessage("§cGebruik: pos1 of pos2!");
+        }
     }
 
     private void handleDelFinish(CommandSender sender, String[] args) {
@@ -303,7 +345,7 @@ public class VVKartCommand implements CommandExecutor {
             return;
         }
 
-        track.setFinish(null);
+        track.setFinishZone(null, null);
         plugin.getDataManager().saveTrack(track);
         Message.send(sender, "finish-deleted", "track", track.getName());
     }

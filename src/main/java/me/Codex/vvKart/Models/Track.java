@@ -13,6 +13,8 @@ public class Track {
     private final String name;
     private Location hub;
     private Location finish;
+    private Location finishPos1;
+    private Location finishPos2;
     private Map<Integer, Location> startPositions;
     private List<Checkpoint> checkpoints;
     private boolean isOpen;
@@ -46,13 +48,41 @@ public class Track {
         this.hub = hub;
     }
 
-    public Location getFinish() {
-        return finish;
+    public boolean isInFinishZone(Location location) {
+        if (finishPos1 == null || finishPos2 == null) {
+            // Backwards compatibility: gebruik oude finish als punt
+            if (finish != null) {
+                return location.distance(finish) < 3.0;
+            }
+            return false;
+        }
+
+        if (! location.getWorld().equals(finishPos1.getWorld())) {
+            return false;
+        }
+
+        double minX = Math.min(finishPos1.getX(), finishPos2.getX());
+        double minY = Math.min(finishPos1.getY(), finishPos2.getY());
+        double minZ = Math.min(finishPos1.getZ(), finishPos2.getZ());
+
+        double maxX = Math.max(finishPos1.getX(), finishPos2.getX());
+        double maxY = Math.max(finishPos1. getY(), finishPos2. getY());
+        double maxZ = Math.max(finishPos1.getZ(), finishPos2.getZ());
+
+        return location.getX() >= minX && location.getX() <= maxX &&
+                location.getY() >= minY && location.getY() <= maxY &&
+                location.getZ() >= minZ && location.getZ() <= maxZ;
     }
 
-    public void setFinish(Location finish) {
-        this.finish = finish;
+    public void setFinishZone(Location pos1, Location pos2) {
+        this.finishPos1 = pos1;
+        this.finishPos2 = pos2;
     }
+
+    public Location getFinishPos1() { return finishPos1; }
+    public Location getFinishPos2() { return finishPos2; }
+    public Location getFinish() { return finish; }
+    public void setFinish(Location finish) { this.finish = finish; }
 
     public int getLaps() {
         return laps;

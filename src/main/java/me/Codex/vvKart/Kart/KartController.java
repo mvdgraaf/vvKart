@@ -1,14 +1,15 @@
 package me.Codex.vvKart.Kart;
 
 import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol. ProtocolLibrary;
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import me.Codex.vvKart.Main;
 import me.Codex.vvKart.Models.Race;
-import me.Codex.vvKart.Models. Racer;
-import org. bukkit.entity.Minecart;
+import me.Codex.vvKart.Models.Racer;
+import org.bukkit.Location;
+import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
@@ -23,8 +24,8 @@ public class KartController {
     public void register() {
         ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(
                 plugin,
-                ListenerPriority. NORMAL,
-                PacketType. Play.Client.STEER_VEHICLE
+                ListenerPriority.NORMAL,
+                PacketType.Play.Client.STEER_VEHICLE
         ) {
             @Override
             public void onPacketReceiving(PacketEvent event) {
@@ -47,55 +48,90 @@ public class KartController {
                 Racer racer = race.getRacer(player);
                 if (racer == null || racer.isFinished()) return;
 
-                // Get WASD input
-                float forward = event.getPacket().getFloat().read(0);   // W/S (-1. 0 to 1.0)
-                float sideways = event. getPacket().getFloat().read(1);  // A/D (-1. 0 to 1.0)
+                // Read WASD input
+                float forward = event.getPacket().getFloat().read(0);   // W/S
+                float sideways = event.getPacket().getFloat().read(1);  // A/D
 
-                // Get player's look direction (for steering)
-                Vector direction = player.getLocation().getDirection();
-                direction.setY(0);  // No vertical movement
-                direction.normalize();
+                // Some clients/protocols report forward inverted; flip if behavior is reversed.
+                // If forward feels backwards in your tests, keep the negation. If it's correct, remove the -.
+                forward = -forward; // invert forward so W -> positive forward motion
 
-                // Get sideways direction (perpendicular to look direction)
-                Vector sidewaysVector = new Vector(-direction.getZ(), 0, direction.getX()). normalize();
+                // Optional: invert sideways if A/D reversed
+                // sideways = -sideways;
 
-                // Get speed from config
+                // Get player's horizontal look direction
+                Vector dir = player.getLocation().getDirection().clone();
+                dir.setY(0);
+                if (dir.lengthSquared() == 0) dir = new Vector(0, 0, 1); // fallback
+                dir.normalize();
+
+                // Sideways vector (perpendicular on XZ plane)
+                Vector sideVec = new Vector(-dir.getZ(), 0, dir.getX()).normalize();
+
+                // Config / tuning
                 double baseSpeed = plugin.getConfig().getDouble("race.speed-multiplier", 0.5);
+                double strafeMultiplier = 0.6;         // A/D slower than forward
+                double accel = 1.2;                    // responsiveness
+                double friction = 0.92;                // damping per packet
 
-                // Apply speed boost if configured (e.g., from items)
-                double speedMultiplier = 1.0;
-                // TODO: Add speed boost from power-ups here
+                // Current vel and target vel
+                Vector current = cart.getVelocity().clone();
+                // preserve vertical for now (we'll override if needed)
+                double currentY = current.getY();
 
-                double finalSpeed = baseSpeed * speedMultiplier;
+                Vector inputVel = new Vector(0, 0, 0);
 
-                // Calculate velocity
-                Vector velocity = new Vector(0, 0, 0);
-
-                // Forward/backward movement
-                if (Math.abs(forward) > 0.01) {
-                    velocity.add(direction.clone().multiply(forward * finalSpeed));
+                // Forward/back
+                if (Math.abs(forward) > 0.01f) {
+                    inputVel.add(dir.clone().multiply(forward * baseSpeed));
                 }
 
-                // Strafe movement (A/D keys)
-                if (Math.abs(sideways) > 0.01) {
-                    velocity. add(sidewaysVector.clone(). multiply(sideways * finalSpeed * 0.5)); // Strafe slower
+                // Strafe (A/D)
+                if (Math.abs(sideways) > 0.01f) {
+                    inputVel.add(sideVec.clone().multiply(sideways * baseSpeed * strafeMultiplier));
                 }
 
-                // Preserve Y velocity (gravity/jumping)
-                velocity.setY(cart.getVelocity().getY());
+                // Make target velocity (XZ)
+                Vector targetXZ = new Vector(inputVel.getX(), 0, inputVel.getZ());
 
-                // Apply slight downward force if in air (better ground contact)
-                if (! cart.isOnGround()) {
-                    velocity.setY(velocity.getY() - 0.08);
+                // Apply simple accel: move current XZ toward targetXZ
+                Vector currentXZ = new Vector(current.getX(), 0, current.getZ());
+                Vector newXZ = currentXZ.multiply(friction).add(targetXZ.multiply(accel * (1.0 - friction)));
+
+                // Helling/step-up detection:
+                // look slightly ahead in movement direction and compare block Y
+                Location cartLoc = cart.getLocation();
+                Vector moveDir = newXZ.clone();
+                if (moveDir.lengthSquared() > 0.0001) {
+                    moveDir.normalize();
+                    Location ahead = cartLoc.clone().add(moveDir.multiply(0.6)); // 0.6 block ahead
+                    double aheadBlockY = ahead.getBlockY();
+                    double cartBlockY = cartLoc.getBlockY();
+
+                    // if ahead block is higher, give small upward velocity to climb
+                    if (aheadBlockY > cartBlockY) {
+                        currentY = 0.25; // tweak to taste
+                    } else {
+                        // keep existing vertical velocity (gravity) but slightly damp it if on ground
+                        if (cart.isOnGround()) currentY = 0.0;
+                    }
                 }
 
-                // Set minecart properties for smoother movement
-                cart.setMaxSpeed(100);  // Remove vanilla speed limit
+                // set final velocity
+                Vector finalVel = new Vector(newXZ.getX(), currentY, newXZ.getZ());
+
+                cart.setMaxSpeed(100);
                 cart.setSlowWhenEmpty(false);
-                cart.setVelocity(velocity);
+                cart.setVelocity(finalVel);
 
-                // Rotate minecart to match player's view
-                cart.setRotation(player.getLocation().getYaw(), 0);
+                // Rotate minecart to face movement direction if moving
+                if (newXZ.lengthSquared() > 0.0001) {
+                    Location lookLoc = cart.getLocation();
+                    Vector lookDir = new Vector(newXZ.getX(), 0, newXZ.getZ()).normalize();
+                    // set a small forward offset to compute yaw
+                    lookLoc.setDirection(lookDir);
+                    cart.teleport(lookLoc);
+                }
             }
         });
 
@@ -103,6 +139,6 @@ public class KartController {
     }
 
     public void unregister() {
-        ProtocolLibrary. getProtocolManager().removePacketListeners(plugin);
+        ProtocolLibrary.getProtocolManager().removePacketListeners(plugin);
     }
 }

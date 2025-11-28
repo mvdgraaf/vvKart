@@ -1,55 +1,39 @@
-package me.Codex.vvKart.Listeners;
+package me.Codex. vvKart.Listeners;
 
-import me.Codex.vvKart.Main;
-import me.Codex.vvKart.Models.Track;
+import me.Codex. vvKart.Main;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
+import org.bukkit. entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
+import org.bukkit.event. Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class PlayerInteractListener implements Listener {
 
+    private final Main plugin;
+
+    public PlayerInteractListener(Main plugin) {
+        this.plugin = plugin;
+    }
+
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
+        ItemStack item = event.getItem();
 
-        // Check for leave item usage
-        if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            ItemStack item = player.getInventory().getItemInMainHand();
+        if (item == null || ! item.hasItemMeta()) return;
 
-            if (item != null && item.hasItemMeta()) {
-                String leaveMaterialName = Main.getInstance().getConfig().getString("leave-item. material", "RED_BED");
-                Material leaveMaterial = Material.getMaterial(leaveMaterialName);
+        // Check if it's the leave item
+        String leaveItemName = plugin.getConfig().getString("leave-item.name", "&c&lVerlaat Race");
+        leaveItemName = leaveItemName.replace("&", "§");
 
-                if (leaveMaterial != null && item.getType() == leaveMaterial) {
-                    // Check if player is in race
-                    if (Main.getInstance().getRaceManager().isInRace(player)) {
-                        event. setCancelled(true);
-                        Main.getInstance().getRaceManager().removeFromRace(player);
-                        return;
-                    }
-                }
-            }
-        }
-
-        // Check for track join (clicking finish line)
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
-            return;
-        }
-
-        if (event.getClickedBlock() == null) {
-            return;
-        }
-
-        // Check if player clicked on a track's finish line
-        Track track = Main.getInstance().getTrackManager().getTrackAtLocation(event.getClickedBlock().getLocation());
-
-        if (track != null) {
+        if (item.getItemMeta().getDisplayName().equals(leaveItemName)) {
             event.setCancelled(true);
-            Main.getInstance().getQueueManager(). addToQueue(player, track);
+
+            // Check if player is in race
+            if (plugin. getRaceManager().isInRace(player)) {
+                plugin.getRaceManager().removeFromRace(player);
+            }
         }
     }
 }

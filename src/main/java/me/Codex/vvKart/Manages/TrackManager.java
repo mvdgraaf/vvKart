@@ -84,24 +84,24 @@ public class TrackManager {
         tracks.put(track.getName().toLowerCase(), track);
     }
 
-    /**
-     * Get track at location (for interaction)
-     */
-    public Track getTrackAtLocation(Location location) {
-        for (Track track : tracks.values()) {
-            if (track.getFinish() != null && track.getFinish().distance(location) < 3) {
-                return track;
-            }
-        }
-        return null;
-    }
+//    /**
+//     * Get track at location (for interaction)
+//     */
+//    public Track getTrackAtLocation(Location location) {
+//        for (Track track : tracks.values()) {
+//            if (track.getFinishPos1() != null && track.getFinish().distance(location) < 3) {
+//                return track;
+//            }
+//        }
+//        return null;
+//    }
 
     /**
      * Check if track is ready to use
      */
     public boolean isTrackReady(Track track) {
         if (track.getHub() == null) return false;
-        if (track. getFinish() == null) return false;
+        if (track.getFinishPos2() == null && track.getFinishPos1() == null) return false;
         if (track.getStartPositions(). isEmpty()) return false;
         if (track.getCheckpoints().isEmpty()) return false;
 
@@ -117,7 +117,7 @@ public class TrackManager {
         if (track.getHub() == null) {
             errors.add("Hub locatie is niet ingesteld");
         }
-        if (track.getFinish() == null) {
+        if (track.getFinishPos2() == null && track.getFinishPos1() != null) {
             errors.add("Finish lijn is niet ingesteld");
         }
         if (track.getStartPositions().isEmpty()) {

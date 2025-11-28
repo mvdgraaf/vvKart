@@ -1,10 +1,10 @@
 package me.Codex.vvKart.Manages;
 
 import me.Codex.vvKart.Main;
-import me.Codex.vvKart.Models.Checkpoint;
+import me. Codex.vvKart.Models.Checkpoint;
 import me.Codex.vvKart.Models.LeaderboardEntry;
 import me.Codex.vvKart.Models.Track;
-import me.Codex.vvKart.Utils.LocationUtil;
+import me. Codex.vvKart. Utils.LocationUtil;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -12,7 +12,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util. Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -26,9 +26,9 @@ public class DataManager {
     public DataManager(Main plugin) {
         this.plugin = plugin;
         this.tracksFolder = new File(plugin.getDataFolder(), "tracks");
-        this.leaderboardFile = new File(plugin.getDataFolder(), "leaderboard.yml");
+        this.leaderboardFile = new File(plugin.getDataFolder(), "leaderboard. yml");
 
-        if (!tracksFolder.exists()) tracksFolder.mkdir();
+        if (!tracksFolder.exists()) tracksFolder. mkdir();
     }
 
     public void loadAll(){
@@ -42,7 +42,7 @@ public class DataManager {
     }
 
     public void loadTracks() {
-        File[] files = tracksFolder.listFiles((dir, name) -> name.endsWith(".yml"));
+        File[] files = tracksFolder.listFiles((dir, name) -> name. endsWith(".yml"));
         if (files == null) return;
 
         for (File file : files) {
@@ -52,29 +52,43 @@ public class DataManager {
             Track track = new Track(trackName, plugin);
 
             track.setOpen(config.getBoolean("open", false));
+            track.setLaps(config.getInt("laps", 3)); // ← Voeg laps toe
 
-            if (config.contains("hub")) {
+            if (config. contains("hub")) {
                 Location hub = LocationUtil.deserialize(config.getString("hub"));
                 track.setHub(hub);
             }
 
-            if (config.contains("finish")) {
+            // ========== NIEUWE FINISH ZONE LOADING ==========
+            if (config.contains("finish-zone. pos1") && config.contains("finish-zone.pos2")) {
+                // Nieuwe format: finish zone met 2 posities
+                Location finishPos1 = LocationUtil.deserialize(config.getString("finish-zone.pos1"));
+                Location finishPos2 = LocationUtil. deserialize(config.getString("finish-zone.pos2"));
+
+                if (finishPos1 != null && finishPos2 != null) {
+                    track.setFinishZone(finishPos1, finishPos2);
+                }
+            } else if (config.contains("finish")) {
+                // Backwards compatibility: oude format (enkel punt)
                 Location finish = LocationUtil.deserialize(config.getString("finish"));
-                track.setFinish(finish);
+                if (finish != null) {
+                    track.setFinish(finish);
+                }
             }
+            // =================================================
 
             if (config.contains("start-positions")) {
                 ConfigurationSection startSection = config.getConfigurationSection("start-positions");
                 if (startSection != null) {
                     for (String key : startSection.getKeys(false)) {
                         try {
-                            int position = Integer.parseInt(key);
+                            int position = Integer. parseInt(key);
                             Location loc = LocationUtil.deserialize(startSection.getString(key));
                             if (loc != null) {
                                 track.setStartPosition(position, loc);
                             }
                         } catch (Exception e) {
-                            plugin. getLogger().warning("Could not load start position " + key + " for track " + trackName);
+                            plugin.getLogger().warning("Could not load start position " + key + " for track " + trackName);
                         }
                     }
                 }
@@ -89,25 +103,23 @@ public class DataManager {
                             ConfigurationSection cpSection = checkpointSection.getConfigurationSection(key);
 
                             if (cpSection != null) {
-                                Location pos1 = LocationUtil.deserialize(cpSection.getString("pos1"));
+                                Location pos1 = LocationUtil. deserialize(cpSection.getString("pos1"));
                                 Location pos2 = LocationUtil.deserialize(cpSection.getString("pos2"));
 
-                                // Check if both locations are valid
                                 if (pos1 != null && pos2 != null) {
                                     Checkpoint checkpoint = new Checkpoint(number, pos1, pos2);
-                                    track.addCheckpoint(checkpoint);
+                                    track. addCheckpoint(checkpoint);
                                 } else {
                                     plugin.getLogger().warning("Skipping checkpoint " + number + " for track " + trackName + " (invalid location data)");
                                 }
                             }
                         } catch (Exception e) {
-                            plugin.getLogger().warning("Could not load checkpoint " + key + " for track " + trackName + ": " + e.getMessage());
+                            plugin.getLogger(). warning("Could not load checkpoint " + key + " for track " + trackName + ": " + e. getMessage());
                         }
                     }
                 }
             }
 
-            // Load leaderboard location
             if (config.contains("leaderboard")) {
                 Location leaderboard = LocationUtil.deserialize(config.getString("leaderboard"));
                 if (leaderboard != null) {
@@ -121,7 +133,6 @@ public class DataManager {
         plugin.getLogger().info("Loaded " + (files != null ? files.length : 0) + " tracks!");
     }
 
-
     public void saveTracks() {
         for (Track track : plugin.getTrackManager().getAllTracks()) {
             saveTrack(track);
@@ -133,24 +144,39 @@ public class DataManager {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
         config.set("open", track.isOpen());
+        config.set("laps", track.getLaps()); // ← Voeg laps toe
 
-        if (track.getHub() != null) config.set("hub", LocationUtil.serialize(track.getHub()));
+        if (track. getHub() != null) {
+            config.set("hub", LocationUtil.serialize(track.getHub()));
+        }
 
-        if (track.getFinish() != null) config.set("finish", LocationUtil.serialize(track.getFinish()));
+        // ========== NIEUWE FINISH ZONE SAVING ==========
+        if (track.getFinishPos1() != null && track.getFinishPos2() != null) {
+            // Save as finish zone
+            config.set("finish-zone.pos1", LocationUtil.serialize(track.getFinishPos1()));
+            config.set("finish-zone.pos2", LocationUtil.serialize(track.getFinishPos2()));
+            // Remove old format if it exists
+            config.set("finish", null);
+        } else if (track.getFinish() != null) {
+            // Backwards compatibility: save old format
+            config.set("finish", LocationUtil.serialize(track. getFinish()));
+            config.set("finish-zone", null);
+        }
+        // =================================================
 
         Map<Integer, Location> startPositions = track.getStartPositions();
-        if(!startPositions.isEmpty()) {
+        if (! startPositions.isEmpty()) {
             for (Map.Entry<Integer, Location> entry : startPositions.entrySet()) {
                 config.set("start-positions." + entry.getKey(), LocationUtil.serialize(entry.getValue()));
             }
         }
 
         List<Checkpoint> checkpoints = track.getCheckpoints();
-        if(!checkpoints.isEmpty()) {
-            for(Checkpoint checkpoint : checkpoints) {
+        if (!checkpoints.isEmpty()) {
+            for (Checkpoint checkpoint : checkpoints) {
                 String path = "checkpoints." + checkpoint.getNumber();
                 config.set(path + ".pos1", LocationUtil.serialize(checkpoint.getPoint1()));
-                config.set(path + ".pos2", LocationUtil.serialize(checkpoint.getPoint2()));
+                config.set(path + ".pos2", LocationUtil. serialize(checkpoint.getPoint2()));
             }
         }
 
@@ -168,14 +194,11 @@ public class DataManager {
 
     public void deleteTrack(String trackName) {
         File file = new File(tracksFolder, trackName + ".yml");
-        if(file.exists()) file.delete();
+        if (file.exists()) file.delete();
     }
 
-    /**
-     * Load all leaderboards
-     */
     public void loadLeaderboard() {
-        if (!leaderboardFile.exists()) {
+        if (!leaderboardFile. exists()) {
             return;
         }
 
@@ -184,31 +207,30 @@ public class DataManager {
         for (Track track : plugin. getTrackManager().getAllTracks()) {
             String trackName = track.getName();
 
-            // Load fastest times
             if (config.contains(trackName + ". fastest")) {
                 ConfigurationSection fastestSection = config.getConfigurationSection(trackName + ".fastest");
                 List<LeaderboardEntry> entries = new ArrayList<>();
 
-                assert fastestSection != null;
-                for (String key : fastestSection.getKeys(false)) {
-                    ConfigurationSection entrySection = fastestSection.getConfigurationSection(key);
+                if (fastestSection != null) {
+                    for (String key : fastestSection.getKeys(false)) {
+                        ConfigurationSection entrySection = fastestSection. getConfigurationSection(key);
 
-                    assert entrySection != null;
-                    String uuidString = entrySection.getString("uuid");
-                    String playerName = entrySection.getString("player");
-                    long time = entrySection.getLong("time");
-                    int position = entrySection.getInt("position");
-                    long date = entrySection.getLong("date", System.currentTimeMillis());
+                        if (entrySection != null) {
+                            String uuidString = entrySection.getString("uuid");
+                            String playerName = entrySection.getString("player");
+                            long time = entrySection.getLong("time");
+                            int position = entrySection.getInt("position");
+                            long date = entrySection.getLong("date", System.currentTimeMillis());
 
-                    UUID playerUUID = uuidString != null ? UUID.fromString(uuidString) : null;
+                            UUID playerUUID = uuidString != null ? UUID.fromString(uuidString) : null;
 
-                    entries.add(new LeaderboardEntry(playerUUID, playerName, time, position, date));
+                            entries.add(new LeaderboardEntry(playerUUID, playerName, time, position, date));
+                        }
+                    }
                 }
 
-                // Sort by time
                 entries.sort(Comparator.comparingLong(LeaderboardEntry::getTime));
 
-                // Add to track
                 for (LeaderboardEntry entry : entries) {
                     track.addFastestTime(entry);
                 }
@@ -218,9 +240,6 @@ public class DataManager {
         plugin.getLogger().info("Loaded leaderboards!");
     }
 
-    /**
-     * Save all leaderboards
-     */
     public void saveLeaderboard() {
         YamlConfiguration config = new YamlConfiguration();
 
@@ -237,8 +256,8 @@ public class DataManager {
                         config.set(path + ".uuid", entry.getPlayerUUID().toString());
                     }
                     config.set(path + ".player", entry.getPlayerName());
-                    config.set(path + ".time", entry.getTime());
-                    config.set(path + ".position", entry.getPosition());
+                    config.set(path + ".time", entry. getTime());
+                    config. set(path + ".position", entry.getPosition());
                     config.set(path + ".date", entry.getDate());
 
                     index++;

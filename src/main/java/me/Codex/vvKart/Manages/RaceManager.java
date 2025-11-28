@@ -80,6 +80,7 @@ public class RaceManager {
                 );
                 minecart.setInvulnerable(true);
                 minecart.setSilent(true);
+                //minecart.setRotation(startPos.getYaw(), 0.0f);
                 minecart.addPassenger(player);
                 racer.setMinecart(minecart);
             }
