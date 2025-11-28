@@ -60,6 +60,7 @@ public class DataManager {
 
             if (config.contains("start-positions")) {
                 ConfigurationSection startSection = config.getConfigurationSection("start-positions");
+                assert startSection != null;
                 for (String key : startSection.getKeys(false)) {
                     int position = Integer.parseInt(key);
                     Location loc = LocationUtil.deserialize(startSection.getString(key));
@@ -69,10 +70,12 @@ public class DataManager {
 
             if (config.contains("checkpoints")) {
                 ConfigurationSection checkpointSection = config.getConfigurationSection("checkpoints");
+                assert checkpointSection != null;
                 for (String key : checkpointSection. getKeys(false)) {
                     int number = Integer.parseInt(key);
                     ConfigurationSection cpSection = checkpointSection.getConfigurationSection(key);
 
+                    assert cpSection != null;
                     Location pos1 = LocationUtil.deserialize(cpSection.getString("pos1"));
                     Location pos2 = LocationUtil.deserialize(cpSection.getString("pos2"));
 
@@ -166,9 +169,11 @@ public class DataManager {
                 ConfigurationSection fastestSection = config.getConfigurationSection(trackName + ".fastest");
                 List<LeaderboardEntry> entries = new ArrayList<>();
 
+                assert fastestSection != null;
                 for (String key : fastestSection.getKeys(false)) {
                     ConfigurationSection entrySection = fastestSection.getConfigurationSection(key);
 
+                    assert entrySection != null;
                     String uuidString = entrySection.getString("uuid");
                     String playerName = entrySection.getString("player");
                     long time = entrySection.getLong("time");
