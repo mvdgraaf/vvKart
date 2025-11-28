@@ -92,14 +92,14 @@ public final class Main extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerInteractListener(this), this);
 
         // World load listener
-        getServer().getPluginManager().registerEvents(new org.bukkit.event. Listener() {
+        getServer().getPluginManager().registerEvents(new org.bukkit.event.Listener() {
             @org.bukkit.event.EventHandler(priority = org.bukkit.event.EventPriority.MONITOR)
             public void onWorldLoad(org.bukkit.event.world.WorldLoadEvent event) {
                 // Als eerste wereld geladen is, laad dan alle tracks
-                if (event. getWorld().getName().equals("world")) {
+                if (event.getWorld().getName().equals("world")) {
                     Bukkit.getScheduler().runTask(Main.this, () -> {
                         dataManager.loadAll();
-                        leaderBoardManager. loadAllLeaderboards();
+                        leaderBoardManager.loadAllLeaderboards();
                         getLogger().info("Tracks and leaderboards loaded after world initialization!");
                     });
                 }
