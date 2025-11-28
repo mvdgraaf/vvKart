@@ -77,12 +77,18 @@ public class Track {
     public void setFinishZone(Location pos1, Location pos2) {
         this.finishPos1 = pos1;
         this.finishPos2 = pos2;
+        this.finish = null;  // ← Clear oude finish!
+    }
+
+    public void setFinish(Location finish) {
+        this.finish = finish;
+        this.finishPos1 = null;
+        this.finishPos2 = null;
     }
 
     public Location getFinishPos1() { return finishPos1; }
     public Location getFinishPos2() { return finishPos2; }
     public Location getFinish() { return finish; }
-    public void setFinish(Location finish) { this.finish = finish; }
 
     public int getLaps() {
         return laps;
@@ -206,8 +212,9 @@ public class Track {
     }
 
     public boolean isSetupComplete() {
+        boolean hasFinish = (finish != null) || (finishPos1 != null && finishPos2 != null);
         return hub != null &&
-                finish != null &&
+                hasFinish &&
                 ! startPositions.isEmpty() &&
                 !checkpoints.isEmpty();
     }
