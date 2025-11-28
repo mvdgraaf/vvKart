@@ -1,9 +1,6 @@
 package me.Codex.vvKart;
 
-import me.Codex.vvKart.Manages.DataManager;
-import me.Codex.vvKart.Manages.LeaderBoardManager;
-import me.Codex.vvKart.Manages.RaceManager;
-import me.Codex.vvKart.Manages.TrackManager;
+import me.Codex.vvKart.Manages.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Main extends JavaPlugin {
@@ -12,6 +9,7 @@ public final class Main extends JavaPlugin {
     private DataManager dataManager;
     private RaceManager raceManager;
     private LeaderBoardManager leaderBoardManager;
+    private QueueManager queueManager;
 
     @Override
     public void onLoad() {
@@ -27,6 +25,7 @@ public final class Main extends JavaPlugin {
     public void onEnable() {
         raceManager = new RaceManager(this);
         leaderBoardManager = new LeaderBoardManager(this);
+        queueManager = new QueueManager(this);
         getLogger().info("Plugin enabled!");
     }
 
@@ -45,6 +44,10 @@ public final class Main extends JavaPlugin {
 
     public RaceManager getRaceManager() {
         return raceManager;
+    }
+
+    public QueueManager getQueueManager() {
+        return queueManager;
     }
 
     public LeaderBoardManager getLeaderBoardManager() {

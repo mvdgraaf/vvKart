@@ -25,13 +25,13 @@ public class RaceManager {
     private final Main plugin;
     private final Map<Track, Race> activeRaces;
     private final Map<UUID, Race> playerRaces;
-    private final Map<UUID, PlayerData> savedPlayerData;
+    //private final Map<UUID, PlayerData> savedPlayerData;
 
     public RaceManager(Main plugin) {
         this.plugin = plugin;
         this.activeRaces = new HashMap<>();
         this.playerRaces = new HashMap<>();
-        this.savedPlayerData = new HashMap<>();
+        //this.savedPlayerData = new HashMap<>();
     }
 
     public void startRace(Track track, List<Player> players){
@@ -347,13 +347,13 @@ public class RaceManager {
         };
     }
 
-    private static class PlayerData {
-        ItemStack[] inventory;
-        ItemStack[] armor;
-        GameMode gameMode;
-        Location location;
-        int foodLevel;
-        double health;
-    }
+//    private static class PlayerData {
+//        ItemStack[] inventory;
+//        ItemStack[] armor;
+//        GameMode gameMode;
+//        Location location;
+//        int foodLevel;
+//        double health;
+//    }
 }
 

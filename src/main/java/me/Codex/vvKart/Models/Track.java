@@ -21,6 +21,7 @@ public class Track {
     private List<LeaderboardEntry> fastestTimes = new ArrayList<>();
     private final int maxLeaderboardEntries = 10;
     private int min_player;
+    private int countdownSeconds;
 
     public Track(String name, Main plugin) {
         this.plugin = plugin;
@@ -28,8 +29,9 @@ public class Track {
         this.startPositions = new HashMap<>();
         this.checkpoints = new ArrayList<>();
         this.isOpen = false;
-        this.laps = getInstance().getConfig().getInt("laps");
-        this.min_player = plugin.getConfig().getInt("min-players", 2);
+        this.laps = getInstance().getConfig().getInt("race.laps");
+        this.min_player = plugin.getConfig().getInt("race.min-players", 2);
+        this.countdownSeconds = getInstance().getConfig().getInt("race.queue-wait-time");
     }
 
     public String getName() {
@@ -111,6 +113,14 @@ public class Track {
 
     public void setOpen(boolean open) {
         isOpen = open;
+    }
+
+    public int getCountdownSeconds() {
+        return countdownSeconds;
+    }
+
+    public void setCountdownSeconds(int countdownSeconds) {
+        this.countdownSeconds = countdownSeconds;
     }
 
     public void setLeaderboard(Location leaderboardLocation) {

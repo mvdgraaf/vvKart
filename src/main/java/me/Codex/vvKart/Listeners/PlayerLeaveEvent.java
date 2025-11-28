@@ -1,4 +1,4 @@
-package me.Codex.vvKart.Events;
+package me.Codex.vvKart.Listeners;
 
 import me.Codex.vvKart.Main;
 import me.Codex.vvKart.Manages.RaceManager;

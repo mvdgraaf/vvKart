@@ -52,6 +52,8 @@ messages:
   leaderboard-deleted: "&aLeaderboard verwijderd voor baan '&e%track%&a'!"
   joined-queue: "&aJe bent de race queue van &e%track%&a toegetreden!"
   left-queue: "&aJe bent uit de race queue van &e%track%&a verlaten!"
+  queue-countdown: "&e%seconds% seconden tot de race start van &e%track%&e!"
+  queue-cancelled: "&cDe countdown van &e%track%&c is geannuleerd! \nNiet genoeg spelers om de race te starten!"
   player-left-queue: "&cSpeler &e%player% &cverlaat de race queue van &e%track%&c!"
   already-in-queue: "&cJe bent al in de race queue!"
   already-in-race: "&cJe bent al in de race!"

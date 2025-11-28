@@ -3,6 +3,7 @@ package me.Codex.vvKart.Manages;
 import me.Codex.vvKart.Main;
 import me.Codex.vvKart.Models.Track;
 import me.Codex.vvKart.Utils.Message;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -91,7 +92,15 @@ public class QueueManager {
     }
 
     public void checkQueueStart(Track track) {
+        Set<UUID> queue = queues.get(track);
+        if (queue == null) return;
 
+        int minPlayers = plugin.getConfig().getInt("race.min-players", 2);
+        int queueSize = queue.size();
+
+        if (queueSize >= minPlayers && !countdownTasks.containsKey(track)) {
+            startCountdown(track);
+        }
     }
 
     public List<Player> getQueuePlayers(Track track) {
@@ -108,7 +117,31 @@ public class QueueManager {
     }
 
     private void startStatusUpdates(Track track) {
+        int minPlayers = track.getMinPlayers();
 
+        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            Set<UUID> queue = queues.get(track);
+            if (queue == null || queue.isEmpty()) return;
+
+            int queueSize = queue.size();
+
+            if (countdownTasks.containsKey(track)) {
+                stopStatusUpdates(track);
+                return;
+            }
+
+            if (queueSize < minPlayers) {
+                int needed = minPlayers - queueSize;
+                String message = String.format("§eWachten op §6%d §emeer speler(s)...   §7(§f%d§7/§f%d§7)",
+                        needed, queueSize, minPlayers);
+
+                for (Player player : getQueuePlayers(track)) {
+                    player.sendMessage(message);
+                }
+            }
+        }, 0L, 20L);
+
+        statusTasks.put(track, task);
     }
 
     public void stopStatusUpdates(Track track) {
@@ -116,8 +149,45 @@ public class QueueManager {
         if (task != null) task.cancel();
     }
 
-    public void cancelCountdwon(Track track) {
+    public void startCountdown(Track track) {
+        int countdownTime = track.getCountdownSeconds();
+        countdownSeconds.put(track, countdownTime);
 
+        stopStatusUpdates(track);
+
+        for (Player player : getQueuePlayers(track)) {
+            Message.send(player, "queue-countdown", "seconds", String.valueOf(countdownTime));
+            Message.sendTitle(player, "&a&lRace Start!", "&eIn " + countdownTime + "", 0, 20, 10);
+        }
+
+        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            int remaining = countdownSeconds.get(track);
+            if (remaining <= 0) {
+                startRace(track);
+                return;
+            }
+
+            if (remaining == 20 || remaining == 10 || remaining == 5 || remaining == 3 || remaining == 2) {
+                for (Player player : getQueuePlayers(track)) {
+                    Message.sendTitle(player, "&a&lRace Start!", "&eIn " + remaining + "", 0, 20, 10);
+                }
+            }
+            countdownSeconds.put(track, remaining - 1);
+        }, 0L, 20L);
+        countdownTasks.put(track, task);
+    }
+    public void cancelCountdwon(Track track) {
+        BukkitTask task = countdownTasks.remove(track);
+        if(task != null ) {
+            task.cancel();
+            countdownSeconds.remove(track);
+
+            for (Player player : getQueuePlayers(track)) {
+                Message.sendTitle(player, "&c&lRace Cancelled!", "", 0, 20, 10);
+                Message.send(player, "queue-cancelled");
+            }
+            startStatusUpdates(track);
+        }
     }
 
     public boolean isInAnyQueue(Player player) {
