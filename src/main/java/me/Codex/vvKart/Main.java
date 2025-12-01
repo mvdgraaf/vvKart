@@ -1,9 +1,12 @@
 package me.Codex.vvKart;
 
 
+import me.Codex.vvKart.Commands.KartTestCommand;
 import me.Codex.vvKart.Commands.LeaderboardTest;
 import me.Codex.vvKart.Commands.VVKartCommand;
+import me.Codex.vvKart.Kart.Kart;
 import me.Codex.vvKart.Kart.KartController;
+import me.Codex.vvKart.Kart.KartProtocolLib;
 import me.Codex.vvKart.Listeners.CheckpointListener;
 import me.Codex.vvKart.Listeners.PlayerInteractListener;
 import me.Codex.vvKart.Listeners.PlayerLeaveEvent;
@@ -21,8 +24,9 @@ public final class Main extends JavaPlugin {
     private RaceManager raceManager;
     private LeaderBoardManager leaderBoardManager;
     private QueueManager queueManager;
-    private KartController kartController;
+    //private KartController kartController;
     private CheckpointListener checkpointTask;
+    private Kart kartController;
 
     @Override
     public void onEnable() {
@@ -35,16 +39,17 @@ public final class Main extends JavaPlugin {
         leaderBoardManager = new LeaderBoardManager(this);
         queueManager = new QueueManager(this);
 
+        new KartProtocolLib(this).register();
         registerListeners();
 
-        kartController = new KartController(this);
-        kartController.register();
+        kartController = new Kart(this);
 
         checkpointTask = new CheckpointListener(this);
         checkpointTask.runTaskTimer(this, 0L, 2L);
 
         Objects.requireNonNull(this.getCommand("testdisplay")).setExecutor(new LeaderboardTest());
         Objects.requireNonNull(getCommand("vvkart")).setExecutor(new VVKartCommand(this));
+        getCommand("testkart").setExecutor(new KartTestCommand(kartController));
 
         getLogger().info("Plugin enabled!");
     }

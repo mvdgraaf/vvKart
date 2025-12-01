@@ -96,30 +96,42 @@ public class TrackManager {
 //        return null;
 //    }
 
-    /**
-     * Check if track is ready to use
-     */
     public boolean isTrackReady(Track track) {
         if (track.getHub() == null) return false;
-        if (track.getFinishPos2() == null && track.getFinishPos1() == null) return false;
-        if (track.getStartPositions(). isEmpty()) return false;
+
+        // ========== FIX: HAAKJES TOEVOEGEN!  ==========
+        boolean hasFinish = (track.getFinish() != null) ||
+                (track.getFinishPos1() != null && track.getFinishPos2() != null);
+        if (!hasFinish) return false;
+        // ============================================
+
+        if (track.getStartPositions().isEmpty()) return false;
         if (track.getCheckpoints().isEmpty()) return false;
 
         return true;
     }
 
-    /**
-     * Get validation errors for a track
-     */
     public List<String> getTrackErrors(Track track) {
         List<String> errors = new ArrayList<>();
 
         if (track.getHub() == null) {
             errors.add("Hub locatie is niet ingesteld");
         }
-        if (track.getFinishPos2() == null && track.getFinishPos1() != null) {
+
+        // ========== FIX: HAAKJES EN LOGICA ==========
+        boolean hasOldFinish = track.getFinish() != null;
+        boolean hasNewFinish = track.getFinishPos1() != null && track. getFinishPos2() != null;
+        boolean hasFinish = hasOldFinish || hasNewFinish;
+
+        if (!hasFinish) {
             errors.add("Finish lijn is niet ingesteld");
+        } else if (track.getFinishPos1() != null && track.getFinishPos2() == null) {
+            errors.add("Finish zone is incompleet (alleen pos1 ingesteld)");
+        } else if (track.getFinishPos1() == null && track.getFinishPos2() != null) {
+            errors.add("Finish zone is incompleet (alleen pos2 ingesteld)");
         }
+        // ===========================================
+
         if (track.getStartPositions().isEmpty()) {
             errors.add("Geen startposities ingesteld");
         }

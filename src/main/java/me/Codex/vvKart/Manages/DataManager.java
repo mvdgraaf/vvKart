@@ -26,7 +26,7 @@ public class DataManager {
     public DataManager(Main plugin) {
         this.plugin = plugin;
         this.tracksFolder = new File(plugin.getDataFolder(), "tracks");
-        this.leaderboardFile = new File(plugin.getDataFolder(), "leaderboard. yml");
+        this.leaderboardFile = new File(plugin.getDataFolder(), "leaderboard.yml");
 
         if (!tracksFolder.exists()) tracksFolder. mkdir();
     }
@@ -60,21 +60,31 @@ public class DataManager {
             }
 
             // ========== NIEUWE FINISH ZONE LOADING ==========
-            if (config.contains("finish-zone. pos1") && config.contains("finish-zone.pos2")) {
-                // Nieuwe format: finish zone met 2 posities
-                Location finishPos1 = LocationUtil.deserialize(config.getString("finish-zone.pos1"));
-                Location finishPos2 = LocationUtil. deserialize(config.getString("finish-zone.pos2"));
+            if (config.contains("finish-zone")) {
+                ConfigurationSection finishSection = config.getConfigurationSection("finish-zone");
 
-                if (finishPos1 != null && finishPos2 != null) {
-                    track.setFinishZone(finishPos1, finishPos2);
+                if (finishSection != null) {
+                    Location finishPos1 = LocationUtil. deserialize(finishSection.getString("pos1"));
+                    Location finishPos2 = LocationUtil. deserialize(finishSection.getString("pos2"));
+
+                    if (finishPos1 != null && finishPos2 != null) {
+                        track. setFinishZone(finishPos1, finishPos2);
+                        plugin.getLogger().info("✓ Loaded finish zone for track " + trackName);
+                    } else {
+                        plugin.getLogger().warning("✗ Failed to deserialize finish zone for track " + trackName);
+                    }
+                } else {
+                    plugin.getLogger().warning("✗ finish-zone section is null for track " + trackName);
                 }
             } else if (config.contains("finish")) {
                 // Backwards compatibility: oude format (enkel punt)
                 Location finish = LocationUtil.deserialize(config.getString("finish"));
                 if (finish != null) {
                     track.setFinish(finish);
+                    plugin.getLogger().info("✓ Loaded old finish point for track " + trackName);
                 }
             }
+
             // =================================================
 
             if (config.contains("start-positions")) {

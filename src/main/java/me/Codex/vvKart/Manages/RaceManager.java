@@ -1,5 +1,7 @@
 package me.Codex.vvKart.Manages;
 
+import me.Codex.vvKart.Kart.Kart;
+import me.Codex.vvKart.Kart.KartProtocolLib;
 import me.Codex.vvKart.Main;
 import me.Codex.vvKart.Models.LeaderboardEntry;
 import me.Codex.vvKart.Models.Race;
@@ -64,25 +66,20 @@ public class RaceManager {
             Location startPos = track.getStartPosition(position);
             if (startPos != null) {
                 player.teleport(startPos);
-//
-//                ArmorStand armorStand = (ArmorStand) startPos.getWorld().spawnEntity(startPos, EntityType.ARMOR_STAND);
-//                armorStand.setVisible(false);
-//                armorStand.setGravity(true);
-//                armorStand.setInvulnerable(true);
-//                armorStand.setCanPickupItems(false);
-//                armorStand.setCollidable(false);
-//                armorStand.setMarker(false);
-//                armorStand.setSilent(true);
 
-                Minecart minecart = (Minecart) startPos.getWorld().spawnEntity(
-                        startPos. clone().add(0, 0.2, 0),
-                        EntityType.MINECART
-                );
-                minecart.setInvulnerable(true);
-                minecart.setSilent(true);
-                //minecart.setRotation(startPos.getYaw(), 0.0f);
-                minecart.addPassenger(player);
-                racer.setMinecart(minecart);
+//                Minecart minecart = (Minecart) startPos.getWorld().spawnEntity(
+//                        startPos. clone().add(0, 0.2, 0),
+//                        EntityType.MINECART
+//                );
+//                minecart.setInvulnerable(true);
+//                minecart.setSilent(true);
+//                //minecart.setRotation(startPos.getYaw(), 0.0f);
+//                minecart.addPassenger(player);
+//                racer.setMinecart(minecart);
+
+                Kart kart = new Kart(plugin);
+                kart.spawnKart(player);
+
             }
 
             racer.saveInventory();
@@ -176,7 +173,8 @@ public class RaceManager {
                     "time", Time.formatTime(racer.getElapsedTime()));
             racer.restoreInventory();
             player.teleport(racer.getRace().getTrack().getHub());
-            racer.getMinecart().remove();
+            KartProtocolLib.unregisterPlayer(player);
+            Kart.despawnKart(player);
         }
 
         Race race = racer.getRace();
@@ -215,6 +213,7 @@ public class RaceManager {
         if (race.getUpdateTask() != null) race.cancelUpdateTask();
         for (Racer racer : race.getRacers()) {
             Player player = racer.getPlayer();
+            KartProtocolLib.unregisterPlayer(player);
             if (racer.isFinished()) {
                 giveRewards(player, racer);
             }
@@ -256,7 +255,7 @@ public class RaceManager {
                 if (race.getTrack(). getHub() != null) {
                     player.teleport(race.getTrack().getHub());
                 }
-
+                KartProtocolLib.unregisterPlayer(player);
                 // Restore player data
                 racer.restoreInventory();
 

@@ -10,15 +10,6 @@ race:
   finish-timeout: 30
   speed-multiplier: 1.0
 
-kart:
-  speed-multiplier: 2.5
-  max-speed: 3.5
-  acceleration: 0.5
-  friction: 0.92
-  strafe-multiplier: 0.6
-  climb-boost: 0.5
-  rotate-to-movement: false
-
 # Rewards
 rewards:
   coins-per-completion: 2

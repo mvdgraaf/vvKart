@@ -1,8 +1,9 @@
 name: vvKart
 version: '0.1'
 main: me.Codex.vvKart.Main
-api-version: '1.20.4'
+api-version: '1.20'
 load: STARTUP
+depend: [ProtocolLib]
 
 commands:
   vvkart:
@@ -12,11 +13,37 @@ commands:
   testdisplay:
     description: places a display on the map
     usage: /<command>
+  testkart:
+    description: places a kart on the map
 
 permissions:
-  vvkart.admin:
-    description: Toegang tot alle admin commands
+  vvkart.*:
     default: op
+    children:
+      vvkart.admin: true
+      vvkart.setup: true
+      vvkart.create: true
+      vvkart.delete: true
+      vvkart.list: true
+      vvkart.info: true
+      vvkart.use: true
+      vvkart.leave: true
+      vvkart.reload: true
+  vvkart.admin:
+    default: op
+  vvkart.setup:
+    default: op
+  vvkart.create:
+    default: op
+  vvkart.delete:
+    default: op
+  vvkart.list:
+    default: op
+  vvkart.info:
+    default: op
+  vvkart.use:
+    default: true
+  vvkart.leave:
+    default: true
   vvkart.reload:
-    description: Reload de plugin
     default: op

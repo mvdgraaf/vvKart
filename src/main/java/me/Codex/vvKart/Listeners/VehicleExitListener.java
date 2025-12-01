@@ -7,6 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 
+@Deprecated
 public class VehicleExitListener implements Listener {
 
     @EventHandler

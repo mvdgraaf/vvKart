@@ -147,12 +147,12 @@ public class VVKartCommand implements CommandExecutor {
     }
 
     private void handleInfo(CommandSender sender, String[] args) {
-        if (! sender.hasPermission("vvkart.info")) {
+        if (!  sender.hasPermission("vvkart.info")) {
             Message.send(sender, "no-permission");
             return;
         }
 
-        if (args. length < 2) {
+        if (args.length < 2) {
             sender.sendMessage("§cGebruik: /vvkart info <naam>");
             return;
         }
@@ -164,17 +164,31 @@ public class VVKartCommand implements CommandExecutor {
             return;
         }
 
+        // ========== FIX: Check BEIDE finish formats ==========
+        boolean hasFinish = (track.getFinish() != null) ||
+                (track.getFinishPos1() != null && track.getFinishPos2() != null);
+        String finishStatus = hasFinish ? "§a✓" : "§c✗";
+
+        // Extra info over finish type
+        String finishType = "";
+        if (track.getFinishPos1() != null && track.getFinishPos2() != null) {
+            finishType = " §7(zone)";
+        } else if (track.getFinish() != null) {
+            finishType = " §7(punt - oud)";
+        }
+        // =====================================================
+
         sender.sendMessage("§6§l▬▬▬▬▬ Track Info: " + track.getName() + " ▬▬▬▬▬");
         sender.sendMessage("§eStatus: " + (track.isOpen() ? "§aOpen" : "§cGesloten"));
-        sender.sendMessage("§eHub: " + (track.getHub() != null ? "§a✓" : "§c✗"));
-        sender.sendMessage("§eFinish: " + (track.getFinishPos2() != null ? "§a✓" : "§c✗"));
-        sender.sendMessage("§eStartposities: §f" + track.getStartPositions().size());
+        sender.sendMessage("§eHub: " + (track.getHub() != null ?  "§a✓" : "§c✗"));
+        sender. sendMessage("§eFinish: " + finishStatus + finishType);  // ← Fixed!
+        sender.sendMessage("§eStartposities: §f" + track.getStartPositions(). size());
         sender.sendMessage("§eCheckpoints: §f" + track. getCheckpoints().size());
-        sender.sendMessage("§eRondes: §f" + track.getLaps());
+        sender.sendMessage("§eRondes: §f" + track. getLaps());
         sender.sendMessage("§eMin.  spelers: §f" + track. getMinPlayers());
 
         List<String> errors = plugin.getTrackManager().getTrackErrors(track);
-        if (!errors.isEmpty()) {
+        if (!  errors.isEmpty()) {
             sender.sendMessage("§c§lProblemen:");
             for (String error : errors) {
                 sender.sendMessage("  §c- " + error);

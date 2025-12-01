@@ -13,6 +13,8 @@ commands:
   testdisplay:
     description: places a display on the map
     usage: /<command>
+  testkart:
+    description: places a kart on the map
 
 permissions:
   vvkart.*:
