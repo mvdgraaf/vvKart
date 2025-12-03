@@ -1,6 +1,5 @@
 package me.Codex.vvKart.Commands;
 
-import me.Codex.vvKart.Kart.Kart;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

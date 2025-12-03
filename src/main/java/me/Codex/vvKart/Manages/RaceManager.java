@@ -1,7 +1,5 @@
 package me.Codex.vvKart.Manages;
 
-import me.Codex.vvKart.Kart.Kart;
-import me.Codex.vvKart.Kart.KartProtocolLib;
 import me.Codex.vvKart.Main;
 import me.Codex.vvKart.Models.LeaderboardEntry;
 import me.Codex.vvKart.Models.Race;
@@ -61,8 +59,7 @@ public class RaceManager {
             if (startPos != null) {
                 player.teleport(startPos);
 
-                // Spawn nieuwe kart (pig + armorstand)
-                new Kart(plugin).spawnKart(player);
+                //TODO spawn a kart for the player
 
             }
 

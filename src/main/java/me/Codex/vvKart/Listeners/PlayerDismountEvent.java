@@ -1,7 +1,5 @@
 package me.Codex.vvKart.Listeners;
 
-import me.Codex.vvKart.Kart.Kart;
-import me.Codex.vvKart.Kart.KartProtocolLib;
 import me.Codex.vvKart.Main;
 import me.Codex.vvKart.Models.Race;
 import org.bukkit.entity.Player;
