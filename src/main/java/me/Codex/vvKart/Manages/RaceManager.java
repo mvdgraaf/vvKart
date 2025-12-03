@@ -10,19 +10,13 @@ import me.Codex.vvKart.Models.Track;
 import me.Codex.vvKart.Utils.Message;
 import me.Codex.vvKart.Utils.Time;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 
@@ -67,25 +61,15 @@ public class RaceManager {
             if (startPos != null) {
                 player.teleport(startPos);
 
-//                Minecart minecart = (Minecart) startPos.getWorld().spawnEntity(
-//                        startPos. clone().add(0, 0.2, 0),
-//                        EntityType.MINECART
-//                );
-//                minecart.setInvulnerable(true);
-//                minecart.setSilent(true);
-//                //minecart.setRotation(startPos.getYaw(), 0.0f);
-//                minecart.addPassenger(player);
-//                racer.setMinecart(minecart);
-
-                Kart kart = new Kart(plugin);
-                kart.spawnKart(player);
+                // Spawn nieuwe kart (pig + armorstand)
+                new Kart(plugin).spawnKart(player);
 
             }
 
             racer.saveInventory();
             racer.clearInventory();
             racer.giveLeaveItem();
-            player.setGameMode(GameMode. ADVENTURE);
+            player.setGameMode(GameMode.ADVENTURE);
 
             position++;
         }
@@ -173,8 +157,7 @@ public class RaceManager {
                     "time", Time.formatTime(racer.getElapsedTime()));
             racer.restoreInventory();
             player.teleport(racer.getRace().getTrack().getHub());
-            KartProtocolLib.unregisterPlayer(player);
-            Kart.despawnKart(player);
+            finishRacerCleanup(player);
         }
 
         Race race = racer.getRace();
@@ -182,14 +165,18 @@ public class RaceManager {
         long finishedCount = race.getRacers().stream(). filter(Racer::isFinished).count();
         if (finishedCount == 1) {
             startFinishTimeout(race);
-            assert player != null;
-            race.markFirstFinisher(player.getUniqueId());
+            if (player != null) race.markFirstFinisher(player.getUniqueId());
         }
 
         if (finishedCount == race.getRacers().size()) {
             endRace(race);
             showResults(race);
         }
+    }
+
+    private void finishRacerCleanup(Player player) {
+        // Despawn kart en unregister input
+        Kart.despawnKart(player);
     }
 
     private void startFinishTimeout(Race race) {
@@ -213,11 +200,13 @@ public class RaceManager {
         if (race.getUpdateTask() != null) race.cancelUpdateTask();
         for (Racer racer : race.getRacers()) {
             Player player = racer.getPlayer();
-            KartProtocolLib.unregisterPlayer(player);
-            if (racer.isFinished()) {
-                giveRewards(player, racer);
+            if (player != null) {
+                if (racer.isFinished()) {
+                    giveRewards(player, racer);
+                }
+                Kart.despawnKart(player); // cleanup
+                playerRaces.remove(racer.getPlayerUUID());
             }
-            playerRaces.remove(racer.getPlayerUUID());
         }
         updateLeaderboard(race);
         activeRaces.remove(race.getTrack());
@@ -245,28 +234,17 @@ public class RaceManager {
     public void removeFromRace(Player player) {
         Race race = playerRaces.remove(player.getUniqueId());
         if (race != null) {
-            Racer racer = race.getRacer(player. getUniqueId());
+            Racer racer = race.getRacer(player.getUniqueId());
             if (racer != null) {
-                if (racer.getMinecart() != null) {
-                    racer.getMinecart().remove();
-                }
-
-                // Teleport to hub
-                if (race.getTrack(). getHub() != null) {
+                Kart.despawnKart(player); // direct cleanup
+                if (race.getTrack().getHub() != null) {
                     player.teleport(race.getTrack().getHub());
                 }
-                KartProtocolLib.unregisterPlayer(player);
-                // Restore player data
                 racer.restoreInventory();
-
-                // Remove from race
                 race.removeRacer(racer.getPlayerUUID());
-
                 Message.send(player, "left-race");
-
-                // Check if race should end
                 if (race.getRacers().isEmpty()) {
-                    cancelRace(race. getTrack());
+                    cancelRace(race.getTrack());
                 }
             }
         }
@@ -275,27 +253,15 @@ public class RaceManager {
     public void cancelRace(Track track) {
         Race race = activeRaces.remove(track);
         if (race != null) {
-            // Cancel tasks
-            if (race.getUpdateTask() != null) {
-                race.getUpdateTask().cancel();
-            }
-
-            // Restore all players
+            if (race.getUpdateTask() != null) race.getUpdateTask().cancel();
             for (Racer racer : race.getRacers()) {
                 Player player = racer.getPlayer();
                 if (player != null) {
-                    if (racer.getMinecart() != null) {
-                        racer.getMinecart().remove();
-                    }
-
-                    if (track.getHub() != null) {
-                        player.teleport(track.getHub());
-                    }
-
+                    Kart.despawnKart(player);
+                    if (track.getHub() != null) player.teleport(track.getHub());
                     racer.restoreInventory();
                     Message.send(player, "race-cancelled");
                 }
-
                 playerRaces.remove(racer.getPlayerUUID());
             }
         }

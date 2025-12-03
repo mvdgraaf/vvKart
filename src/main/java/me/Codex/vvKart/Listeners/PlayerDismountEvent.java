@@ -1,6 +1,9 @@
 package me.Codex.vvKart.Listeners;
 
+import me.Codex.vvKart.Kart.Kart;
 import me.Codex.vvKart.Kart.KartProtocolLib;
+import me.Codex.vvKart.Main;
+import me.Codex.vvKart.Models.Race;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -10,12 +13,17 @@ public class PlayerDismountEvent implements Listener {
 
     @EventHandler
     public void onDismount(EntityDismountEvent event) {
-        if(!(event.getEntity() instanceof Player player)) return;
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (!KartProtocolLib.inputs.containsKey(player)) return; // niet in kart
 
-        if(!KartProtocolLib.inputs.containsKey(player)) return;
+        Race race = Main.getInstance().getRaceManager().getRace(player);
+        if (race != null && race.getState() == Race.RaceState.RACING) {
+            // Tijdens race blokkeren we dismount
+            event.setCancelled(true);
+            return;
+        }
 
-        event.setCancelled(true);
+        // Buiten actieve race: laat dismount toe maar ruim kart op
+        Kart.despawnKart(player);
     }
-
-
 }

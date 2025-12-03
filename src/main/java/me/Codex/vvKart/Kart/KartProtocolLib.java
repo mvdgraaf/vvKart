@@ -16,12 +16,9 @@ public class KartProtocolLib {
     private final Main plugin;
     public static final Map<Player, KartInput> inputs = new HashMap<>();
 
-    public KartProtocolLib(Main plugin) {
-        this.plugin = plugin;
-    }
+    public KartProtocolLib(Main plugin) { this.plugin = plugin; }
 
     public void register() {
-
         ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(
                 plugin,
                 ListenerPriority.NORMAL,
@@ -30,27 +27,28 @@ public class KartProtocolLib {
             @Override
             public void onPacketReceiving(PacketEvent event) {
                 Player player = event.getPlayer();
-
-                if (!inputs.containsKey(player)) return;
+                KartInput input = inputs.get(player);
+                if (input == null) return;
 
                 float sideways = event.getPacket().getFloat().read(0);
                 float forward = event.getPacket().getFloat().read(1);
+                boolean jump = event.getPacket().getBooleans().read(0);
 
-                KartInput input = inputs.get(player);
                 input.forward = forward;
                 input.sideways = sideways;
+                input.jump = jump;
+
+                if (Math.abs(forward) > 0.01 || Math.abs(sideways) > 0.01) {
+                    input.idleTicks = 0;
+                } else {
+                    input.idleTicks++;
+                }
             }
         });
 
-        plugin.getLogger().info("ProtocolLib kart input listener registered!");
+        plugin.getLogger().info("Kart ProtocolLib listener ready.");
     }
 
-    public static void registerPlayer(Player player) {
-        inputs.put(player, new KartInput());
-    }
-
-    public static void unregisterPlayer(Player player) {
-        if (!inputs.containsKey(player)) return;
-        inputs.remove(player);
-    }
+    public static void registerPlayer(Player player) { inputs.put(player, new KartInput()); }
+    public static void unregisterPlayer(Player player) { inputs.remove(player); }
 }
